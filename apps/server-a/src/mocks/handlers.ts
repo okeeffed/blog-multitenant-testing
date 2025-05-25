@@ -11,14 +11,14 @@ class QueueError {
 
 export const handlers = [
   http.post("http://localhost:3001/notifications", ({ request }) => {
-    switch (request.headers.get("X-Testing-ID")) {
-      case "ValidationError":
+    switch (request.headers.get("X-Tenancy-ID")) {
+      case "DownstreamB/ValidationError":
         return HttpResponse.json(
           new QueueError({
             _tag: "ValidationError",
           }),
         );
-      case "TimeoutError":
+      case "DownstreamB/TimeoutError":
         return HttpResponse.json(
           new QueueError({
             _tag: "TimeoutError",

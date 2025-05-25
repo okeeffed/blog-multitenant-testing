@@ -38,7 +38,7 @@ app.post("/users", async (c) => {
       new NewUserNotification(newUser),
       {
         headers: {
-          "X-Testing-ID": c.req.header("X-Testing-ID"),
+          "X-Tenancy-ID": c.req.header("X-Tenancy-ID"),
         },
       },
     );
