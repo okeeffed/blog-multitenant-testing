@@ -46,6 +46,11 @@ app.post("/users", async (c) => {
     switch (res.data._tag) {
       case "ItemQueued":
         return c.json(new UserCreatedResponse(newUser));
+      case "ItemQueuedNewVersionResponse":
+        return c.json({
+          _tag: "UserCreated",
+          _message: "This uses the alternative tenant",
+        });
       default:
         return c.json(new UnhandledResponseTagError());
     }

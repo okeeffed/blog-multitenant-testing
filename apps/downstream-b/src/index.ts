@@ -41,6 +41,10 @@ class ItemQueuedResponse {
   readonly _tag = "ItemQueued";
 }
 
+class ItemQueuedNewVersionResponse {
+  readonly _tag = "ItemQueuedNewVersionResponse";
+}
+
 class QueueError {
   readonly _tag = "QueueError";
   readonly value: unknown;
@@ -68,8 +72,8 @@ class NewUserNotification implements Notification<User> {
 
 const app = new Hono();
 
-async function addToQueue(notification: NewUserNotification) {
-  return axios.post("http://localhost:3002/queue", notification);
+async function addToQueue(notification: NewUserNotification, baseUrl: string) {
+  return axios.post(`${baseUrl}/queue`, notification);
 }
 
 app.post("/notifications", async (c) => {
@@ -81,13 +85,28 @@ app.post("/notifications", async (c) => {
       return c.json(new ValidationError(notificationBodyResult.error));
     }
 
+    // This is shoe-horned in for demonstration. In reality, you should come up
+    // with a better approach to resolving this value.
+    let baseUrl;
+    switch (c.req.header("X-Tenancy-ID")) {
+      case "Feature/QueueUpdate":
+        baseUrl = "http://localhost:3003";
+        break;
+      default:
+        baseUrl = "http://localhost:3002";
+    }
+
     const res = await addToQueue(
       new NewUserNotification(notificationBodyResult.data.value),
+      baseUrl,
     );
 
+    console.log("TAG", res.data._tag);
     switch (res.data._tag) {
       case "SuccessfullyQueued":
         return c.json(new ItemQueuedResponse());
+      case "SuccessfullyQueuedAlt":
+        return c.json(new ItemQueuedNewVersionResponse());
       // Propagate the following errors back under one
       // unified error type for the sake of it.
       case "ValidationError":
