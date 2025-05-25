@@ -51,6 +51,10 @@ app.post("/users", async (c) => {
           _tag: "UserCreated",
           _message: "This uses the alternative tenant",
         });
+      // Propagate QueueError as response
+      case "QueueError":
+        c.status(500);
+        return c.json(res.data);
       default:
         return c.json(new UnhandledResponseTagError());
     }
